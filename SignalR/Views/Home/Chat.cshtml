@@ -1,0 +1,58 @@
+﻿
+@{
+    ViewData["Title"] = "Chat";
+}
+
+<div class="container">
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-2">User</div>
+        <div class="col-4"><input type="text" id="userInput" /></div>
+    </div>
+    <div class="row">
+        <div class="col-2">Message</div>
+        <div class="col-4"><input type="text" id="messageInput" /></div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-6">
+            <input type="button" id="sendButton" value="Send Message" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <hr />
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <ul>
+            @foreach (var item in ViewBag.Users)
+            {
+            <li id="@item.Id" style="list-style:none;">
+                <span class="@(item.ConnectionId == null?"gray":"green")" style="height:10px;width:10px;border-radius:50%;display:inline-block;">@item.FullName <a asp-controller="Home" asp-action="ShowUserAlert" asp-route-id="@item.Id">send</a></span>
+            </li>
+            }
+        </ul>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chathub").build();
+        connection.start();
+        $("#sendButton").click(function () {
+            let userValue = $("#userInput").val();
+            let userMessage = $("#messageInput").val();
+            connection.invoke("SendMessage", userValue, userMessage);
+        })
+        connection.on("RecieveMessage", function (user, message) {
+            console.log(user + "" + message);
+        })
+    </script>
+
+}
+
